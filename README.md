@@ -5,4 +5,4 @@
 
 Unfortunately I have decided to keep the files private, However, I'd love to talk about it. 
 
-For any queries [Contact](gauravmohit1324@gmail.com)
+For inqueries [Contact](gauravmohit1324@gmail.com)
