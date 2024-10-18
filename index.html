@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Leetcode Bot Blog</title>
+
+    <!-- Link to external CSS file -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Prism.js CSS for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <h1>Auto Solve LeetCode Problems</h1>
+
+    <h2>TLDR</h2>
+    <ul>
+        <li>Example account I leveled <a href="https://leetcode.com/u/lukemcleon/">here</a>. It's not the original one, but alas, it gives an idea of what I did.</li>
+        <li>Try Leetcode yourself <a href="https://leetcode.com/">here</a>.</li>
+        <li>Unfortunately, I opted to keep the files private. <a href="mailto:gauravmohit1324@gmail.com">Message</a> me for inquiries</li>
+    </ul>
+
+    <h2>The Motivation</h2>
+    <p>Like most software kids, I was told DSA (data structures and algorithms) were pivotally important to becoming a good developer, and consequently, getting a well-paying job. Hence, I created a Leetcode account and began to solve questions with the goal of solving many questions.</p>
+    <p>This was all fine and dandy, except, it took a long time — time I didn't have balancing five other university courses! So, I decided on writing a bot to auto-solve the questions for me. I worked on it with one friend.</p>
+
+    <h3 class="section-heading">Reversal</h3>
+    <p class="italic">"Would making this bot help me with learning the material Leetcode questions were supposed to teach? Absolutely not, and thus, I definitely do them manually as well for practice, but, nonetheless, finding a way to solve them automatically was a fun endeavour."</p>
+
+    <h2>How the Bot Works</h2>
+
+    <h3>1. Grabbing a user's session</h3>
+    <p>This acts similarly to regular users "logging in" to their Leetcode accounts. Upon starting the CLI tool, I prompt users to provide us their credentials (security? I don't any word like that):</p>
+    <pre><code class="language-bash">
+Username: some_username 
+Password: ********
+    </code></pre>
+    <p>Then, I downloaded the official Chromium Chrome Driver so that I could use the aforementioned credentials to boot up a headless Chrome instance and login to a user's account by automating the entry of their username and password. I found that Leetcode surprisingly let these feeble authentication attempts work!</p>
+    <p>Next, I pulled the authenticated user's cookies that I needed to make API requests on their behalf:</p>
+    <pre><code class="language-python">
+# assumes the headless Chrome instance has
+# been authenticated and is sitting on
+# Leetcode's home screen
+cookies = login_driver.get_cookies()
+for cookie in cookies:
+    if (cookie['name'] == 'csrftoken'):
+        csfr_token = cookie['value']
+    if (cookie['name'] == 'LEETCODE_SESSION'):
+        session_id = cookie['value']
+
+# prints the cookies
+print(csfr_token, session_id)
+    </code></pre>
+
+    <h3>2. Getting the user's solving preferences</h3>
+    <p>After I authenticate a user and store their cookies, I allow them to select from the CLI their preference of:</p>
+    <ul>
+        <li>Solving language (ex: Java, Python, etc.).</li>
+        <li>Solving difficulty (ex: easy, medium, hard, random).</li>
+    </ul>
+    <p>I do this via simple input collection via the standard Python input function.</p>
+
+    <h3>3. Answering the questions</h3>
+    <p>Finally, with our prerequisite data acquired, I now could execute the steps below to solve <em>n</em> number of questions. These all utilize the user's solving preferences and credential tokens to authorize the API requests.</p>
+    <p>First, I poll the questions a user has yet to solve via:</p>
+    <pre><code class="language-python">
+questions = get_questions("https://leetcode.com/api/problems/" + question_type + "/?status=notstarted")
+    </code></pre>
+    <p>Then, I parse this to retrieve the identifiers of unsolved questions.</p>
+    <p>Using the parsed question identifiers, the bot proceeds to iterate through each unsolved question, filtering out those that are either already solved ("status": "ac"), require payment ("paid_only": True), or do not align with the user's preferences regarding difficulty and attempt status. For each remaining eligible question, the bot constructs a URL to fetch potential solutions using the user's preferred programming language:</p>
+    <pre><code class="language-python">
+def format_question_url(question_name, language_type) -> str:
+    return "https://leetcode.com/problems/" + question_name + "/solutions/?orderBy=most_votes&languageTags=" + language_type
+
+# `question_stats` is the returned data
+# I got from checking all a user's questions
+# and then filtering on x, y, z above
+question_name = question_stats["stat"]["question__title_slug"]
+solution_url = format_question_url(question_name, language_type)
+    </code></pre>
+    <p>The bot then scrapes the Leetcode solutions page (AKA: discussions) for the most voted solutions using a headless browser session. Once a promising solution is found, the bot prepares it for submission.</p>
+
+    <p>Before submitting the solution, the bot rigorously tests it against the question's example test cases. This step is vital to ensure that the solution not only compiles but also passes all preliminary tests, significantly increasing the likelihood of a successful submission (~95% success with cases vs <50% without). This used Leetcode's GraphQL endpoint to fetch test cases, run them on our newfound solution, and then listen for when they finish executing and I get a response.</p>
+
+    <p>This utilizes endpoints like:</p>
+    <ul class="code-list">
+    <li><code>POST https://leetcode.com/graphql/</code></li>
+    <li><code>POST https://leetcode.com/problems/&lt;QUESTION_NAME&gt;/interpret_solution/</code></li>
+    <li><code>GET https://leetcode.com/submissions/detail/&lt;TESTING_ANSWER_RESP_ID&gt;/check/</code></li>
+    </ul>
+
+
+    <p>If the solution passes all test cases, the bot proceeds to submit the solution on behalf of the user. This submission process mimics a user's action by sending a POST request to the appropriate Leetcode endpoint. Of course, this is completed with the necessary headers, cookies, and CSRF tokens to authenticate the request (as I do with all other API requests above):</p>
+    <pre><code class="language-python">
+if test_result["run_success"] and test_result["total_correct"] == test_result["total_testcases"]:
+    # internally:
+    # POST https://leetcode.com/problems/&lt;QUESTION_NAME&gt;/submit/
+    submit_solution(possible_solution, language_type, question_id)
+    </code></pre>
+    <p>The bot handles submissions carefully, abiding by rate limits (which I found very lenient) and handling errors gracefully to avoid any negative impact on the user's account.</p>
+
+    <p>After a successful submission, the bot logs the outcome and moves on to the next question, continuing this process until all eligible questions have been attempted.</p>
+
+    <p>... and that's how you solve thousands of Leetcode questions in one day! Hehe!</p>
+
+    <!-- Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,139 @@
+body {
+    font-family: 'Times New Roman', Times, serif, sans-serif;
+    line-height: 1.6;
+    padding: 20px;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+h1 {
+    text-align: center;
+    color: #000000;
+}
+
+/* Styling for unordered list */
+ul {
+    list-style-type: disc; /* Adds dot bullets */
+    padding-left: 20px; /* Indents the list */
+    margin-bottom: 20px;
+}
+
+/* Style for list items */
+li {
+    font-size: 16px;
+    color: #333;
+}
+
+/* Optional: Style the links if you want them to look specific */
+a {
+    color: #1a73e8; /* Link color */
+    text-decoration: none; /* No underline */
+}
+
+a:hover {
+    text-decoration: underline; /* Underline on hover for better UX */
+}
+
+/* Style for the heading above the italic paragraph */
+h3.section-heading {
+    font-size: 18px;  /* Adjust the size of the heading */
+    font-weight: bold;
+    color: #888888;   /* Light gray color similar to the paragraph */
+    padding-left: 20px; /* Align with the paragraph */
+    margin-bottom: 5px; /* Small margin below the heading */
+    border-left: 4px solid #333; /* Same left border as the paragraph */
+}
+
+/* Add styles for the blockquote or special paragraph */
+p.italic {
+    font-style: italic;
+    color: #888888; /* Light gray color for the text */
+    padding-left: 20px; /* Indent the text to the right */
+    border-left: 4px solid #333; /* Add a dark vertical line on the left */
+    margin-bottom: 20px; /* Space below the paragraph */
+    font-size: 16px; /* Ensure text size is readable */
+    line-height: 1.6; /* Increase line height for readability */
+}
+
+h2 {
+    color: #444;
+    margin-top: 40px;
+}
+
+h3 {
+    color: #555;
+    margin-top: 30px;
+}
+
+pre {
+    padding: 10px;
+    background-color: #2d2d2d;
+    border-radius: 8px;
+    font-size: 1em;
+    overflow: auto;
+    margin-bottom: 20px;
+}
+
+/* General code styling */
+code {
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    color: #dcdcaa; /* Light yellow color for code */
+    background-color: #1e1e1e; /* Dark background similar to IDEs */
+    padding: 2px 4px; /* Padding around code */
+    border-radius: 4px; /* Rounded corners for code blocks */
+    display: inline-block; /* Ensures inline display */
+}
+
+pre code.language-python {
+    color: #dcdcaa;
+}
+
+pre code.language-bash {
+    color: #c586c0;
+}
+
+/* Paragraph styling */
+p {
+    margin-bottom: 20px;
+    font-size: 16px;
+    color: #333;
+}
+
+/* Unordered list styling */
+ul {
+    margin-bottom: 20px;
+    list-style-type: disc; /* Ensure bullets are shown */
+}
+
+/* Styling for list items */
+p, li {
+    font-size: 16px;
+    color: #333; /* Dark color for regular text */
+}
+
+/* Specific styling for the code block inside list items */
+ul.code-list li code {
+    display: block; /* Display as block to ensure list-like behavior */
+    margin-bottom: 10px; /* Add some space between the code blocks */
+    background-color: #1e1e1e; /* Dark background for code blocks */
+    padding: 6px 10px; /* Add padding for readability */
+    border-radius: 4px; /* Slightly rounded corners */
+    color: #dcdcaa; /* Light yellow code text */
+}
+
+/* Style for the list inside the code block */
+ul.code-list {
+    list-style-type: disc; /* Show bullets for this list */
+    padding-left: 20px; /* Indent the list */
+    margin-bottom: 20px; /* Space after the list */
+}
+
+/* Style for code inside list items */
+ul.code-list li code {
+    background-color: #333; /* Dark background for code */
+    color: #dcdcaa; /* Change text color to look like code */
+    font-family: Consolas, Monaco, "Courier New", Courier, monospace; /* Use monospace font */
+    padding: 2px 6px; /* Padding inside the code block */
+    border-radius: 4px; /* Rounded corners */
+    display: inline-block; /* Ensures the code appears inline */
+}
